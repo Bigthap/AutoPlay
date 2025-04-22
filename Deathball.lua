@@ -60,7 +60,7 @@ local function simulateDash()
 	VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.Space, false, game)
 
 	-- รอให้กระโดดขึ้นเล็กน้อยก่อน dash
-	task.wait(0.08)
+	task.wait(0.5)
 
 	-- Dash (กด Q)
 	VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.Q, false, game)
