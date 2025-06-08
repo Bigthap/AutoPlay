@@ -1,6 +1,7 @@
 _G.TargetName = {
     "Butterfly",
     "Disco Bee",
+    "Dragonfly",
 }
 
 local function isTargetPet(name)
