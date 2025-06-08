@@ -1,4 +1,4 @@
-_G.TargetName = "Queen Bee"
+_G.TargetName = "Disco Bee"
 local notrejoin = false
 local DataSer = require(game:GetService("ReplicatedStorage").Modules.DataService)
 repeat wait() until DataSer:GetData() and DataSer:GetData().SavedObjects
