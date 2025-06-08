@@ -1,5 +1,5 @@
 _G.TargetName = {
-    "Dragonfly",
+    "Butterfly",
     "Disco Bee",
 }
 
