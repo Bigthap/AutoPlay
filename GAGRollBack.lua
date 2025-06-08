@@ -1,7 +1,7 @@
-repeat wait() until game:IsLoaded() and game.Players.LocalPlayer and game.Players.LocalPlayer.Character
 _G.TargetName = "Queen Bee"
 local notrejoin = false
 local DataSer = require(game:GetService("ReplicatedStorage").Modules.DataService)
+repeat wait() until DataSer:GetData() and DataSer:GetData().SavedObjects
 while true do wait()
     for i,v in pairs(DataSer:GetData().SavedObjects) do
         if v.ObjectType == "PetEgg" then
