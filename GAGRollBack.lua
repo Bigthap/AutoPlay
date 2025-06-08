@@ -13,6 +13,7 @@ local function isTargetPet(name)
 end
 
 local DataSer = require(game:GetService("ReplicatedStorage").Modules.DataService)
+local nameofpet
 
 repeat task.wait() until DataSer:GetData() and DataSer:GetData().SavedObjects
 
