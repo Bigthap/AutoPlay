@@ -1,25 +1,44 @@
-_G.TargetName = "Disco Bee"
-local notrejoin = false
+_G.TargetName = {
+    "Dragonfly",
+    "Disco Bee",
+}
+
+local function isTargetPet(name)
+    for _, targetName in ipairs(_G.TargetName) do
+        if name == targetName then
+            return true
+        end
+    end
+    return false
+end
+
 local DataSer = require(game:GetService("ReplicatedStorage").Modules.DataService)
-repeat wait() until DataSer:GetData() and DataSer:GetData().SavedObjects
-while true do wait()
-    for i,v in pairs(DataSer:GetData().SavedObjects) do
-        if v.ObjectType == "PetEgg" then
-            if v.Data.RandomPetData ~= nil then
-                if v.Data.CanHatch then
-                    if v.Data.RandomPetData.Name == _G.TargetName then
-                        notrejoin = true
-                    end 
-                end
+
+repeat task.wait() until DataSer:GetData() and DataSer:GetData().SavedObjects
+
+while true do
+    task.wait()
+    local notrejoin = false
+
+    for _, v in pairs(DataSer:GetData().SavedObjects) do
+        if v.ObjectType == "PetEgg" and v.Data.RandomPetData and v.Data.CanHatch then
+            if isTargetPet(v.Data.RandomPetData.Name) then
+                notrejoin = true
+                nameofpet = v.Data.RandomPetData.Name
+                break
             end
         end
     end
+
     if notrejoin then
-        print("Found Eggs!")
+        print(nameofpet)
+        break
     else
-        wait(3)
-        game:GetService("Players").LocalPlayer:Kick("Don't have your target pet\Rejoin")
+        task.wait(3)
+        game:GetService("Players").LocalPlayer:Kick("Don't have your target pet\\Rejoin")
         task.wait(1)
-        game:GetService("TeleportService"):Teleport(game.PlaceId, game:GetService("Players").LocalPlayer)
+        pcall(function()
+            game:GetService("TeleportService"):Teleport(game.PlaceId, game:GetService("Players").LocalPlayer)
+        end)
     end
 end
