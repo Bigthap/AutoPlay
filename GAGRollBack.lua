@@ -1,3 +1,4 @@
+repeat wait() until game:IsLoaded() and game.Players.LocalPlayer and game.Players.LocalPlayer.Character
 _G.TargetName = "Queen Bee"
 local notrejoin = false
 local DataSer = require(game:GetService("ReplicatedStorage").Modules.DataService)
