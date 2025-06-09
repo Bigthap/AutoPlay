@@ -1,17 +1,15 @@
-_G.TargetName = {
-    "Butterfly",
-    "Disco Bee",
-    "Dragonfly",
-    "Red Fox",
+_G.TargetPets = {
+    -- ["ชื่อ Pet"] = น้ำหนักขั้นต่ำที่ยอมรับ
+    ["Butterfly"] = 0.1,
+    ["Disco Bee"] = 0.1,
+    ["Dragonfly"] = 3.0,
+    ["Red Fox"] = 0.1,
+    ["Queen Bee"] = 10.1,
 }
 
-local function isTargetPet(name)
-    for _, targetName in ipairs(_G.TargetName) do
-        if name == targetName then
-            return true
-        end
-    end
-    return false
+local function isTargetPet(name, weight)
+    local minWeight = _G.TargetPets[name]
+    return minWeight and weight and weight >= minWeight
 end
 
 local DataSer = require(game:GetService("ReplicatedStorage").Modules.DataService)
@@ -25,9 +23,12 @@ while true do
 
     for _, v in pairs(DataSer:GetData().SavedObjects) do
         if v.ObjectType == "PetEgg" and v.Data.RandomPetData and v.Data.CanHatch then
-            if isTargetPet(v.Data.RandomPetData.Name) then
+            local petName = v.Data.RandomPetData.Name
+            local petWeight = v.Data.BaseWeight
+            
+            if isTargetPet(petName, petWeight) then
                 notrejoin = true
-                nameofpet = v.Data.RandomPetData.Name
+                nameofpet = petName
                 break
             end
         end
