@@ -2,7 +2,7 @@ _G.TargetPets = {
     -- ["ชื่อ Pet"] = น้ำหนักขั้นต่ำที่ยอมรับ
     ["Butterfly"] = 0.1,
     ["Disco Bee"] = 0.1,
-    ["Dragonfly"] = 3.0,
+    ["Dragonfly"] = 2.0,
     ["Red Fox"] = 0.1,
     ["Queen Bee"] = 0.1,
 }
