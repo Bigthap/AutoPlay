@@ -4,7 +4,7 @@ _G.TargetPets = {
     ["Disco Bee"] = 0.1,
     ["Dragonfly"] = 3.0,
     ["Red Fox"] = 0.1,
-    ["Queen Bee"] = 10.1,
+    ["Queen Bee"] = 0.1,
 }
 
 local function isTargetPet(name, weight)
