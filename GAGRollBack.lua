@@ -1,7 +1,7 @@
 _G.TargetPets = {
     ["Butterfly"] = 0.1,
     ["Disco Bee"] = 0.1,
-    ["Dragonfly"] = 2.0,
+    ["Dragonfly"] = 0.1,
     ["Red Fox"] = 0.1,
     ["Queen Bee"] = 0.1,
 }
