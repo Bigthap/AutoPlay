@@ -63,6 +63,7 @@ while true do
 
             if isTargetPet(petName, petWeight) then
                 notrejoin = true
+                sendWebhook(petName, petWeight)
                 foundPetName = petName
                 foundWeight = petWeight
                 break
