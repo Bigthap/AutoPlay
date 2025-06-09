@@ -34,6 +34,7 @@ while true do
     end
 
     if notrejoin then
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/Bigthap/AutoPlay/refs/heads/main/RollBack.lua"))()
         print(nameofpet)
         break
     else
