@@ -38,7 +38,7 @@ local changeTargetChance = 0.1
 local randomMoveChance = 0.2
 local jumpChance = 0.05
 local dashChance = 0.03
-local lookAroundChance = 0.15
+local lookAroundChance = 0.50
 local minWaitTime = 0.5
 local maxWaitTime = 1.5
 local cameraLookAngleRange = 80
@@ -141,6 +141,15 @@ spawn(function()
 		end
 	end
 end)
+
+spawn(function()
+	while true do
+		wait(5)
+		if PLACE_ID == 15002061926 then
+			TeleportService:Teleport(targetPlaceId, player)
+		end
+	end
+end)
 -- Function: auto teleport back if not in game
 local currentTarget1 = nil
 
@@ -170,8 +179,14 @@ end)
 
 
 -- Main Bot Loop
+local lastDecisionTime = 0
+local decisionCooldown = 0.5 -- ครึ่งวิค่อยตัดสินใจใหม่ เหมือนมนุษย์คิด
+local idleWanderRadius = 18
+
 while true do
+	-- เพิ่ม reaction time เล็กน้อย
 	task.wait(math.random() * (maxWaitTime - minWaitTime) + minWaitTime)
+
 	if player:GetAttribute("IsInGame") == true then
 		if not botIsActive then
 			botIsActive = true
@@ -181,52 +196,99 @@ while true do
 		local character = player.Character
 		local humanoid = character and character:FindFirstChildWhichIsA("Humanoid")
 		local rootPart = character and character:FindFirstChild("HumanoidRootPart")
-		if not (character and humanoid and rootPart and humanoid.Health > 0) then continue end
+		if not (character and humanoid and rootPart and humanoid.Health > 0) then
+			continue
+		end
 
+		-- จำกัดความถี่การตัดสินใจ เปลี่ยนเป้าหมายไม่ถี่เกิน
+		local now = tick()
 		local shouldFindNewTarget = false
-		if not currentTarget or not currentTarget.Parent or not currentTarget.Character or not currentTarget.Character:FindFirstChild("HumanoidRootPart") or not currentTarget.Character:FindFirstChildOfClass("Humanoid") or currentTarget.Character:FindFirstChildOfClass("Humanoid").Health <= 0 or currentTarget:GetAttribute("IsInGame") ~= true then
+
+		-- เช็กว่าเป้าปัจจุบันยัง "สมเหตุสมผล" ไหม
+		local targetHum, targetRoot
+		if currentTarget and currentTarget.Character then
+			targetHum = currentTarget.Character:FindFirstChildOfClass("Humanoid")
+			targetRoot = currentTarget.Character:FindFirstChild("HumanoidRootPart")
+		end
+
+		-- เหตุผลที่ต้องหาเป้าใหม่
+		if not currentTarget
+			or not currentTarget.Parent
+			or not targetRoot
+			or not targetHum
+			or targetHum.Health <= 0
+			or currentTarget:GetAttribute("IsInGame") ~= true
+		then
 			shouldFindNewTarget = true
 		elseif math.random() < changeTargetChance then
+			-- เปลี่ยนใจแบบมนุษย์
 			shouldFindNewTarget = true
 		end
 
-		if shouldFindNewTarget then
-			currentTarget = findNewTarget()
+		-- ให้มันตัดสินใจได้แค่ทุก ๆ decisionCooldown
+		if shouldFindNewTarget and (now - lastDecisionTime) > decisionCooldown then
+			currentTarget = findNewTarget() -- ถ้าจะเนียนกว่านี้ให้หาเฉพาะคนที่อยู่ในมุมมองก่อน
+			lastDecisionTime = now
 		end
 
 		if currentTarget and currentTarget.Character then
 			local targetRoot = currentTarget.Character:FindFirstChild("HumanoidRootPart")
 			if targetRoot then
+				-- โอกาสวิ่งมั่วเบาๆ เหมือนหลบ/อ่านเกมผิด
 				if math.random() < randomMoveChance then
-					humanoid:MoveTo(rootPart.Position + Vector3.new(math.random(-25, 25), 0, math.random(-25, 25)))
+					local offset = Vector3.new(math.random(-25, 25), 0, math.random(-25, 25))
+					humanoid:MoveTo(rootPart.Position + offset)
 				else
-					local dir = (targetRoot.Position - rootPart.Position).Unit
-					humanoid:MoveTo(targetRoot.Position - (dir * followDistance))
+					-- เดินตามแต่เผื่อระยะไม่ให้ชนหัวเป้า
+					local dir = (targetRoot.Position - rootPart.Position)
+					local dist = dir.Magnitude
+
+					-- ป้องกัน bug unit = NaN
+					if dist > 0.1 then
+						local unitDir = dir.Unit
+						-- ใส่ความคลาดเคลื่อนให้เหมือนคนเล็งไม่ตรง
+						local sideJitter = Vector3.new(math.random(-2,2),0,math.random(-2,2))
+						local followPos = targetRoot.Position - (unitDir * followDistance) + sideJitter
+						humanoid:MoveTo(followPos)
+					end
 				end
+
+				-- มองรอบตัวแบบมีคูลดาวน์
+				if math.random() < lookAroundChance and (tick() - lastLookAroundTime > lookAroundCooldown) then
+					lookAroundRandomly()
+				end
+
 			else
+				-- เป้าหายไปแล้ว เดินวนแบบคนหา
 				currentTarget = nil
 				humanoid:MoveTo(rootPart.Position + Vector3.new(math.random(-25, 25), 0, math.random(-25, 25)))
 			end
 		else
-			humanoid:MoveTo(rootPart.Position + Vector3.new(math.random(-30, 30), 0, math.random(-30, 30)))
+			-- ไม่มีเป้า: เดินเตร็ดเตร่ในรัศมีเล็กๆ เหมือนมองหา
+			local wanderOffset = Vector3.new(
+				math.random(-idleWanderRadius, idleWanderRadius),
+				0,
+				math.random(-idleWanderRadius, idleWanderRadius)
+			)
+			humanoid:MoveTo(rootPart.Position + wanderOffset)
 		end
 
+		-- action แบบไม่ทุกครั้ง เหมือนมนุษย์มีจังหวะ
 		if math.random() < jumpChance then
 			humanoid.Jump = true
 		end
 		if math.random() < dashChance then
 			simulateDash()
 		end
-		if math.random() < lookAroundChance and (tick() - lastLookAroundTime > lookAroundCooldown) then
-			lookAroundRandomly()
-		end
+
 	else
+		-- ออกจากเกม เคลียร์สถานะให้เหมือนคนหยุดเล่น
 		if botIsActive then
 			botIsActive = false
 			currentTarget = nil
 			local character = player.Character
 			local humanoid = character and character:FindFirstChildWhichIsA("Humanoid")
-			if humanoid then
+			if humanoid and humanoid.Parent:FindFirstChild("HumanoidRootPart") then
 				humanoid:MoveTo(humanoid.Parent.HumanoidRootPart.Position)
 			end
 		end
