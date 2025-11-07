@@ -144,7 +144,7 @@ end)
 
 spawn(function()
 	while true do
-		wait(5)
+		wait(10000)
 		if PLACE_ID == 15002061926 then
 			TeleportService:Teleport(targetPlaceId, player)
 		end
