@@ -48,6 +48,13 @@ local currentTarget = nil
 local lastLookAroundTime = 0
 local botIsActive = false
 
+-- Function: get character component
+local function getCharacterComponents()
+	local character = player.Character or player.CharacterAdded:Wait()
+	local humanoid = character:WaitForChild("Humanoid")
+	local hrp = character:WaitForChild("HumanoidRootPart")
+	return humanoid, hrp
+end
 
 -- Function: simulate dash
 local function simulateDash()
@@ -96,7 +103,44 @@ local function findNewTarget()
 	return nil
 end
 
+-- Function: check player count and teleport
+local function findServer()
+	local url = "https://games.roblox.com/v1/games/" .. PLACE_ID .. "/servers/Public?sortOrder=Asc&limit=100"
+	local success, result = pcall(function()
+		return HttpService:JSONDecode(game:HttpGet(url))
+	end)
+	if success and result and result.data then
+		for _, server in ipairs(result.data) do
+			if server.playing >= MINIMUM_PLAYERS and server.id ~= game.JobId then
+				return server.id
+			end
+		end
+	end
+	return nil
+end
 
+local function checkPlayersAndTeleport()
+	if #Players:GetPlayers() < MINIMUM_PLAYERS then
+		local serverId = findServer()
+		if serverId then
+			for _, p in pairs(Players:GetPlayers()) do
+				TeleportService:TeleportToPlaceInstance(PLACE_ID, serverId, p)
+			end
+		else
+			warn("ไม่พบ server ที่เหมาะสม")
+		end
+	end
+end
+
+spawn(function()
+	while true do
+		wait(5)
+		checkPlayersAndTeleport()
+		if PLACE_ID == 15002061926 then
+			TeleportService:Teleport(targetPlaceId, player)
+		end
+	end
+end)
 -- Function: auto teleport back if not in game
 local currentTarget1 = nil
 
