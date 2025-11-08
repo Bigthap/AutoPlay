@@ -142,14 +142,19 @@ spawn(function()
 	end
 end)
 
+-- ฟังก์ชัน rejoin
+local function rejoin()
+	TeleportService:Teleport(targetPlaceId, player)
+end
+
+-- ทำทุก 30 นาที (1800 วินาที)
 spawn(function()
 	while true do
-		wait(10000)
-		if PLACE_ID == 15002061926 then
-			TeleportService:Teleport(targetPlaceId, player)
-		end
+		wait(1800)
+		rejoin()
 	end
 end)
+
 -- Function: auto teleport back if not in game
 local currentTarget1 = nil
 
